@@ -15,3 +15,4 @@ Resources
 
 Knockout.js documentation
 Google Maps API documentation
+Foursquare API documentation

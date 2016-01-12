@@ -4,25 +4,29 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>Udacity Neighborhood Map Project</title>        
         <meta name="viewport" content="width=device-width, initial-scale=1">        
-        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/style.min.css">        
+        <script src="js/jquery-1.11.3.js"></script>
+        <script src="js/bootstrap.js"></script>
     </head>
     <body>
         <div id="map" class="map" ></div>
-        <div id="sidebar ">    
-                <div class="places-header"> Places in Massachusetts </div>
-                <div >
-                    <input id="search" placeholder="Filter by name" data-bind="value: search, valueUpdate: 'afterkeydown'">
-                    <div>
-                        <ul id="places-view" data-bind="foreach: results">
-                            <li id="list-name" data-bind="text: $data.name, click: $parent.setPlace"></li>
-                        </ul>
-                    </div>
-                </div>
-        </div>
-	
-        <script async src="https://maps.googleapis.com/maps/api/js"></script>		
-		<script src="js/knockout-3.4.0.js"></script>
-		<script src="js/app.js"></script>
 
+        <div id="sidebar ">    
+            
+            <div class="places-header"> Places in Massachusetts </div>
+            <div  data-bind="visible: hideShow">
+                <input id="search" placeholder="Filter by name" data-bind="value: search, valueUpdate: 'afterkeydown'">
+                <div>
+                    <ul id="places-view" data-bind="foreach: results">
+                        <li id="list-name" data-bind="text: $data.name, click: $parent.setPlace"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script async defer
+             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVawt4zbk863R2wH0y8dWObORVO2pisas&callback=initMap"></script>
+        <script src="js/knockout-3.4.0.js"></script>
+        <script src="js/app.js"></script>
     </body>
 </html>
