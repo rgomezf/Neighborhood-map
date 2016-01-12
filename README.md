@@ -7,7 +7,7 @@ The app can be run double clicking the index.html once downloaded and following 
 2. Uncompress the zip into a folder. (if you're already running a localhost inside the localhost folder and open the index.html file on your browser)
 3. In a terminal go to the folder
 4. On linux run this commands in two differents windows: 
-		1. python -m SimpleHTTPServer 8080 
+		1. python -m SimpleHTTPServer 8080 (p.s.: use this for python2 in python3 use: python3 -m http.server)
 		2. ngrok 8080 (copy the address that return this command into your browser)
 
 

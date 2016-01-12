@@ -5,8 +5,6 @@
         <title>Udacity Neighborhood Map Project</title>        
         <meta name="viewport" content="width=device-width, initial-scale=1">        
         <link rel="stylesheet" href="css/style.min.css">        
-        <script src="js/jquery-1.11.3.js"></script>
-        <script src="js/bootstrap.js"></script>
     </head>
     <body>
         <div id="map" class="map" ></div>
@@ -25,7 +23,9 @@
         </div>
 
         <script async defer
-             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVawt4zbk863R2wH0y8dWObORVO2pisas&callback=initMap"></script>
+             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVawt4zbk863R2wH0y8dWObORVO2pisas&callback=initMap" onerror="errorHandler()"></script>
+        <script src="js/jquery-1.11.3.js"></script>
+        <script src="js/bootstrap.js"></script>
         <script src="js/knockout-3.4.0.js"></script>
         <script src="js/app.js"></script>
     </body>

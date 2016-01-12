@@ -1,54 +1,55 @@
 // Initialize Model
 var placeData = [
-        {
-            name: 'Fenway Park',            
-            street: '4 Yawkey Way',
-            city: 'Boston, MA',
-            description: 'Historic, small-capacity ballpark, home of the Red Sox & occasional big-name concert venue.',
-            img: 'img/Fenway-min.png',
-            lat: 42.34638888888889,
-            lng: -71.0975
-        },
-        {
-            name: 'Old North Church',
-            street: '193 Salem St.',
-            city: 'Boston, MA',
-            description: "Hallowed 18th-century church & launch point for Paul Revere's revolutionary ride, with tours & more",
-            img: 'img/Church-min.png',
-            lat: 42.36611111111111, 
-            lng: -71.05445555555555
-        },
-        {
-            name: 'Symphony Hall',
-            street: '301 Massachusetts Avenue',
-            city: 'Boston, MA',
-            description: ' Designed by McKim, Mead and White, it was built in 1900 for the Boston Symphony Orchestra, which continues to make the hall its home. The hall was designated a U.S. National Historic Landmark in 1999. It was then noted that "Symphony Hall remains, acoustically, among the top three concert halls in the world ... and is considered the finest in the United States.',
-            img: 'img/Garden-min.png',
-            lat: 42.342594444444444,
-            lng:-71.08580555555555
-        },
-        {
-            name: 'Museum of Fine Arts',            
-            street: '465 Huntington Ave',
-            city: 'Boston, MA',
-            description: 'Neoclassical & modern wings house a vast collection from ancient Egyptian to contemporary American. ',
-            img: 'img/Museum-min.png',
-            lat: 42.3394567,
-            lng:  -71.09414279999999
-        },
-        {
-            name: 'Castle Island Park',
-            street: '2010 William J Day Blvd',
-            city: 'Boston, MA',
-            description: 'Castle Island is located on Day Boulevard in South Boston on the shore of Boston Harbor. It has been the site of a fortification since 1634.',
-            img: 'img/Castle-min.jpg',
-            lat: 42.337500000000006, 
-            lng: -71.01055555555556
-        }
+{
+	name: 'Fenway Park',            
+	street: '4 Yawkey Way',
+	city: 'Boston, MA',
+	description: 'Historic, small-capacity ballpark, home of the Red Sox & occasional big-name concert venue.',
+	img: 'img/Fenway-min.png',
+	lat: 42.34638888888889,
+	lng: -71.0975
+},
+{
+	name: 'Old North Church',
+	street: '193 Salem St.',
+	city: 'Boston, MA',
+	description: "Hallowed 18th-century church & launch point for Paul Revere's revolutionary ride, with tours & more",
+	img: 'img/Church-min.png',
+	lat: 42.36611111111111, 
+	lng: -71.05445555555555
+},
+{
+	name: 'Symphony Hall',
+	street: '301 Massachusetts Avenue',
+	city: 'Boston, MA',
+	description: ' Designed by McKim, Mead and White, it was built in 1900 for the Boston Symphony Orchestra, which continues to make the hall its home. The hall was designated a U.S. National Historic Landmark in 1999. It was then noted that "Symphony Hall remains, acoustically, among the top three concert halls in the world ... and is considered the finest in the United States.',
+	img: 'img/Garden-min.png',
+	lat: 42.342594444444444,
+	lng:-71.08580555555555
+},
+{
+	name: 'Museum of Fine Arts',            
+	street: '465 Huntington Ave',
+	city: 'Boston, MA',
+	description: 'Neoclassical & modern wings house a vast collection from ancient Egyptian to contemporary American. ',
+	img: 'img/Museum-min.png',
+	lat: 42.3394567,
+	lng:  -71.09414279999999
+},
+{
+	name: 'Castle Island Park',
+	street: '2010 William J Day Blvd',
+	city: 'Boston, MA',
+	description: 'Castle Island is located on Day Boulevard in South Boston on the shore of Boston Harbor. It has been the site of a fortification since 1634.',
+	img: 'img/Castle-min.jpg',
+	lat: 42.337500000000006, 
+	lng: -71.01055555555556
+}
 ];
 
 // Binding the model
 function initMap() {
+	'use strict';
 	ko.applyBindings(new ViewModel());
 }
 
@@ -66,6 +67,11 @@ var Place = function(data) {
     this.address = ko.observable();
 };
 
+// Display an Error Message if the Google API Couldn't load
+function errorHandler() {
+    "use strict";
+    document.getElementById('map').innerHTML = "<h2>Something happened while loading the Map.</h2>";
+}
 // Initialize ViewModel
 var ViewModel = function() {
 	var self = this;
@@ -86,6 +92,13 @@ var ViewModel = function() {
 	// Initial status of the sidebar
 	self.hideShow = ko.observable(true);
 
+	// Initialize Google Maps
+  	self.map = new google.maps.Map(document.getElementById('map'), {
+        	center: {lat: 42.33, lng: -71.02},
+            zoom: 12,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
 	// Functions invoked when user clicked an item in the list.
 	self.setPlace = function(clickedPlace) {
 
@@ -100,7 +113,7 @@ var ViewModel = function() {
 
 		// Hide the sidebar
 		self.hideShowSidebar(false);
-		
+
 		// Activate the selected marker to change icon.
 		self.activateMarker(self.markers[index], self, self.infowindow)();
 
@@ -118,13 +131,6 @@ var ViewModel = function() {
 	        });
 	    }
 	});
-
-	// Initialize Google Maps
-  	self.map = new google.maps.Map(document.getElementById('map'), {
-        	center: {lat: 42.33, lng: -71.02},
-            zoom: 12,
-			mapTypeId: google.maps.MapTypeId.ROADMAP
-        });
 
   	// Initialize markers
 	self.markers = [];
@@ -171,16 +177,18 @@ var ViewModel = function() {
 ViewModel.prototype.createMarkers = function(arrayInput) {
 
 	var infowindow = this.infowindow;
-	var context = this;
+	var self = this;
 	var display = arrayInput;
-    
+    var k = this.markers.length;
+    var len = display.length;
+
 	// Take out old markers from the map
-	for (var j = 0, k = this.markers.length; j < k; j++) {
+	for (var j = 0; j < k; j++) {
 		this.markers[j].setMap(null);
 	}
 
 	// Create new marker for each place in array and push to markers array
-  	for (var i = 0, len = display.length; i < len; i++){
+  	for (var i = 0; i < len; i++){
 
 		var location = {lat: display[i].lat(), lng: display[i].lng()};
 		var marker = new google.maps.Marker({
@@ -188,16 +196,15 @@ ViewModel.prototype.createMarkers = function(arrayInput) {
 				map: this.map,
 				icon: 'img/iconDefault.png'
 			});
+
 		this.markers.push(marker);
 
 		//render in the map
-		this.markers[i].setMap(this.map);
-
-		//Get information from Foursquare 
-        this.infoPlace(display[i].name());
+		this.markers[i].setMap(this.map);		
+		this.map.setCenter(location);
 
 		// add event listener for click event to the newly created marker
-		marker.addListener('click', this.activateMarker(marker, context, infowindow, i));
+		marker.addListener('click', this.activateMarker(marker, self, infowindow, i));
   	}
 
 };
@@ -205,7 +212,8 @@ ViewModel.prototype.createMarkers = function(arrayInput) {
 // Set all marker icons back to default icons.
 ViewModel.prototype.defaultIcons = function() {
 	var markers = this.markers;
-	for (var i = 0; i < markers.length; i++) {
+	var len = markers.length;
+	for (var i = 0; i < len; i++) {
 		markers[i].setIcon('img/iconDefault.png');
 	}
 };
@@ -218,6 +226,25 @@ ViewModel.prototype.hideShowSidebar = function(value) {
 
 };
 
+// move map view so that the point is at the center bottom of the map
+ViewModel.prototype.centerMap = function(place, offsetIt) {
+	var self = this;
+	if (offsetIt !== true) {
+	    self.map.setCenter(place.position);
+	}
+	else {
+	    var scale = Math.pow(2, self.map.getZoom());
+	    var mapHeight = $(window).height();
+	    var projection = self.map.getProjection();
+	    var pixPosition = projection.fromLatLngToPoint(place.position);
+	    var pixPosNew = new google.maps.Point(
+	        pixPosition.x,
+	        pixPosition.y - (mapHeight * .45 / scale)
+	    );
+	    var posLatLngNew = projection.fromPointToLatLng(pixPosNew);
+	    self.map.setCenter(posLatLngNew);
+	}
+};
 // Set the target marker to change icon and open infowindow
 ViewModel.prototype.activateMarker = function(marker, context, infowindow, index) {
 	return function() {
@@ -236,6 +263,8 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 		// Hide the sidebar
 		context.hideShowSidebar(false);
 
+		context.centerMap(marker, true);
+
 		// Open targeted infowindow and change its icon.
 		infowindow.open(context.map, marker);
 		marker.setIcon('img/iconActive.png');
@@ -252,7 +281,7 @@ ViewModel.prototype.updateContent = function(place){
     // Using an Ajax call for the foursquare information
     $.ajax({
         method: 'GET',
-        type: 'jsonp',
+        type: 'json',
         url: 'https://api.foursquare.com/v2/venues/search',
         data: {
             ll: lat + ',' + lng,
@@ -267,7 +296,7 @@ ViewModel.prototype.updateContent = function(place){
         
         for(var i in results){
             var result = results[i];
-                address = address = result.location.address + '. ' +
+                address = result.location.address + '. ' +
                 		result.location.city + ', ' +
                 		result.location.state+ '. ' +
                 		result.location.country;    
@@ -289,16 +318,17 @@ ViewModel.prototype.updateContent = function(place){
 				   '<h4> Website: </h4> <p>' + self.foursquareResults()[0].link + '</p>' +
 				   '<h4> checkinsCount: </h4> <p>' + self.foursquareResults()[0].checkinsCount + '</p>' +				   
 				   '<h4> Address: </h4><p>' + self.foursquareResults()[0].address + '</p></div>';   
-			self.infowindow.setContent(html);	          }        
+			self.infowindow.setContent(html);	          
+		}        
     })
     .fail(function(){
         self.foursquareResults([]);
-        alert('There was an error from foursquare');
+        alert('There was an error from Foursquare');
+        self.infowindow.close();
+        self.hideShowSidebar(true);
+        self.defaultIcons();
     });	
 	
-};
-
-ViewModel.prototype.infoPlace = function(place) {
 };
 
 // Initialize Knockout View Model
