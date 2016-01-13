@@ -1,7 +1,16 @@
 // Initialize Model
 var placeData = [
 {
-	name: 'Fenway Park',            
+	name: 'Castle Island Park',
+	street: '2010 William J Day Blvd',
+	city: 'Boston, MA',
+	description: 'Castle Island is located on Day Boulevard in South Boston on the shore of Boston Harbor. It has been the site of a fortification since 1634.',
+	img: 'img/Castle-min.jpg',
+	lat: 42.337500000000006,
+	lng: -71.01055555555556
+},
+{
+	name: 'Fenway Park',
 	street: '4 Yawkey Way',
 	city: 'Boston, MA',
 	description: 'Historic, small-capacity ballpark, home of the Red Sox & occasional big-name concert venue.',
@@ -10,12 +19,21 @@ var placeData = [
 	lng: -71.0975
 },
 {
+	name: 'Museum of Fine Arts',
+	street: '465 Huntington Ave',
+	city: 'Boston, MA',
+	description: 'Neoclassical & modern wings house a vast collection from ancient Egyptian to contemporary American. ',
+	img: 'img/Museum-min.png',
+	lat: 42.3394567,
+	lng:  -71.09414279999999
+},
+{
 	name: 'Old North Church',
 	street: '193 Salem St.',
 	city: 'Boston, MA',
 	description: "Hallowed 18th-century church & launch point for Paul Revere's revolutionary ride, with tours & more",
 	img: 'img/Church-min.png',
-	lat: 42.36611111111111, 
+	lat: 42.36611111111111,
 	lng: -71.05445555555555
 },
 {
@@ -26,24 +44,6 @@ var placeData = [
 	img: 'img/Garden-min.png',
 	lat: 42.342594444444444,
 	lng:-71.08580555555555
-},
-{
-	name: 'Museum of Fine Arts',            
-	street: '465 Huntington Ave',
-	city: 'Boston, MA',
-	description: 'Neoclassical & modern wings house a vast collection from ancient Egyptian to contemporary American. ',
-	img: 'img/Museum-min.png',
-	lat: 42.3394567,
-	lng:  -71.09414279999999
-},
-{
-	name: 'Castle Island Park',
-	street: '2010 William J Day Blvd',
-	city: 'Boston, MA',
-	description: 'Castle Island is located on Day Boulevard in South Boston on the shore of Boston Harbor. It has been the site of a fortification since 1634.',
-	img: 'img/Castle-min.jpg',
-	lat: 42.337500000000006, 
-	lng: -71.01055555555556
 }
 ];
 
@@ -58,10 +58,10 @@ var Place = function(data) {
 	this.name = ko.observable(data.name);
 	this.lat = ko.observable(data.lat);
 	this.lng = ko.observable(data.lng);
-	this.img = ko.observable(data.img);		
+	this.img = ko.observable(data.img);
 	this.addrs = ko.computed(function() {
         return data.street + ", " + data.city;
-    }, this);    
+    }, this);
     this.link = ko.observable();
     this.checkinsCount = ko.observable();
     this.address = ko.observable();
@@ -105,7 +105,7 @@ var ViewModel = function() {
 		// Set current location to which user clicked.
 		self.currentPlace(clickedPlace);
 
-		// Find index of the clicked location 
+		// Find index of the clicked location
 		var index = self.results().indexOf(clickedPlace);
 
 		// Prepare content for Google Maps infowindow
@@ -167,7 +167,7 @@ var ViewModel = function() {
 
     // when the user close the infowindow icons return to defaults
 	google.maps.event.addListener(self.infowindow,'closeclick',function(){
-     // return defaults icons.  
+     // return defaults icons.
 		self.defaultIcons();
 		self.hideShowSidebar(true);
     });
@@ -200,7 +200,7 @@ ViewModel.prototype.createMarkers = function(arrayInput) {
 		this.markers.push(marker);
 
 		//render in the map
-		this.markers[i].setMap(this.map);		
+		this.markers[i].setMap(this.map);
 		this.map.setCenter(location);
 
 		// add event listener for click event to the newly created marker
@@ -219,8 +219,8 @@ ViewModel.prototype.defaultIcons = function() {
 };
 
 // Hide/Show the sidebar on user click
-ViewModel.prototype.hideShowSidebar = function(value) {	
-	if (value === null && typeof value === "object") 
+ViewModel.prototype.hideShowSidebar = function(value) {
+	if (value === null && typeof value === "object")
 	 this.hideShow(true);
 	else this.hideShow(value);
 
@@ -239,7 +239,7 @@ ViewModel.prototype.centerMap = function(place, offsetIt) {
 	    var pixPosition = projection.fromLatLngToPoint(place.position);
 	    var pixPosNew = new google.maps.Point(
 	        pixPosition.x,
-	        pixPosition.y - (mapHeight * .45 / scale)
+	        pixPosition.y - (mapHeight * 0.45 / scale)
 	    );
 	    var posLatLngNew = projection.fromPointToLatLng(pixPosNew);
 	    self.map.setCenter(posLatLngNew);
@@ -252,7 +252,7 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 		// check if have an index. If have an index mean request come from click on the marker event
 		if (!isNaN(index)) {
 			var place = context.results()[index];
-			context.updateContent(place);			
+			context.updateContent(place);
 		}
 		// closed opened infowindow
 		infowindow.close();
@@ -293,33 +293,46 @@ ViewModel.prototype.updateContent = function(place){
     .done(function(data) {
         self.foursquareResults([]);
         var results = data.response.venues;
-        
+
         for(var i in results){
             var result = results[i];
-                address = result.location.address + '. ' +
-                		result.location.city + ', ' +
-                		result.location.state+ '. ' +
-                		result.location.country;    
+
+            // Preparing the content of the infowindo
+			html = '<div class="info-content"> ' +
+				   '<img src="' + place.img() + '">';
 
             var formattedResult = {
                 name: result.name,
-                link: result.url,                
+                url: result.url,
                 checkinsCount: result.stats.checkinsCount,
                 description: result.description,
-                address: address
-            };                     
-            //console.log(formattedResult);            
-            self.foursquareResults.push(formattedResult);           
+                address: result.location.formattedAddress,
+                pic: result.bestPhoto
+            };
+			self.foursquareResults.push(formattedResult);
 
-            // Preparing the content of the infowindo
-			html = '<div class="info-content">' +
-				   '<img src="' + place.img() + '">' +				   
-				   '<h3>' + self.foursquareResults()[0].name + '</h3>' +
-				   '<h4> Website: </h4> <p>' + self.foursquareResults()[0].link + '</p>' +
-				   '<h4> checkinsCount: </h4> <p>' + self.foursquareResults()[0].checkinsCount + '</p>' +				   
-				   '<h4> Address: </h4><p>' + self.foursquareResults()[0].address + '</p></div>';   
-			self.infowindow.setContent(html);	          
-		}        
+			/* name */
+			if (self.foursquareResults()[0].name !== null && self.foursquareResults()[0].name !== undefined){
+				html = html + '<h3>' + self.foursquareResults()[0].name + '</h3>';
+			}
+			/* Url */
+			if (self.foursquareResults()[0].url !== null && self.foursquareResults()[0].url !== undefined){
+				html = html + '<h4> Website: </h4> <p>' + self.foursquareResults()[0].url + '</p>';
+			}
+			/* checks */
+			if (self.foursquareResults()[0].checkinsCount !== null && self.foursquareResults()[0].checkinsCount !== undefined){
+				html = html + '<h4> CheckinsCount: </h4> <p>' + self.foursquareResults()[0].checkinsCount + '</p>';
+			}
+			/* Description */
+			if (self.foursquareResults()[0].description !== null && self.foursquareResults()[0].description !== undefined){
+				html = html + '<h4> Description: </h4> <p>' + self.foursquareResults()[0].description + '</p>';
+			}
+			/* address */
+            if (self.foursquareResults()[0].address !== null && self.foursquareResults()[0].address !== undefined){
+                html =  html + '<h4> Address: </h4><p>' + self.foursquareResults()[0].address + '</p></div>';
+            }
+			self.infowindow.setContent(html);
+		}
     })
     .fail(function(){
         self.foursquareResults([]);
@@ -327,11 +340,7 @@ ViewModel.prototype.updateContent = function(place){
         self.infowindow.close();
         self.hideShowSidebar(true);
         self.defaultIcons();
-    });	
-	
+    });
+
 };
 
-// Initialize Knockout View Model
-// ko.applyBindings(new ViewModel());
-// Foursquare ID: TFRNPMAZSVO544LSS0YZCPKSGSNXBQZIL0JLGVXNQBX25MYW
-// 4Square Secret: BW5JMW0MSFGPZ4AHHFGVVZZZBXR5P5CB3LTYPYHKGFPFRNZJ
